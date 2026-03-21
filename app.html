@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TripDost App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#090C1A;--surface:#111428;--card:#161A30;--card2:#1C2140;
+      --border:rgba(255,255,255,0.07);--bacc:rgba(240,125,42,0.3);
+      --orange:#F07D2A;--og:#FFAB5E;--text:#EEF0F8;--muted:#7A839E;--soft:#B0B8D0;
+      --green:#4ADE80;--red:#F87171;--yellow:#FCD34D;
+      --fd:'Syne',sans-serif;--fb:'Plus Jakarta Sans',sans-serif;--r:12px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;font-family:var(--fb);background:var(--bg);color:var(--text);}
+    ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--orange);border-radius:2px;}
+
+    /* NAV */
+    .nav{height:52px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;background:rgba(9,12,26,0.95);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+    .nav-logo{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--orange);text-decoration:none;}
+    .nav-logo em{color:var(--text);font-style:normal;}
+    .nav-tag{background:rgba(240,125,42,0.15);border:1px solid var(--bacc);color:var(--og);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
+    .nav-back{font-size:12px;color:var(--muted);text-decoration:none;}
+    .nav-back:hover{color:var(--orange);}
+
+    /* TABS */
+    .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);}
+    .tab{flex:1;padding:12px 4px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;user-select:none;}
+    .tab.active{color:var(--orange);border-bottom-color:var(--orange);}
+
+    /* PANELS */
+    .panels{overflow:hidden;}
+    .panel{display:none;padding:16px;}
+    .panel.active{display:block;}
+
+    /* FORM ELEMENTS */
+    .fl{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;display:block;}
+    .fw{position:relative;margin-bottom:12px;}
+    .fw .ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;z-index:1;}
+    select,input{width:100%;padding:10px 10px 10px 34px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--fb);font-size:13px;outline:none;transition:border-color .2s;appearance:none;}
+    select:focus,input:focus{border-color:var(--bacc);}
+    select option{background:#161A30;}
+
+    .stops-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+    .stop-item{display:flex;gap:6px;align-items:center;}
+    .stop-item select{flex:1;}
+    .rm-btn{width:28px;height:28px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);border-radius:8px;color:#F87171;cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+    .rm-btn:hover{background:rgba(248,113,113,0.25);}
+
+    .add-btn{width:100%;padding:8px;background:transparent;border:1px dashed rgba(255,255,255,0.12);border-radius:var(--r);color:var(--muted);font-size:12px;cursor:pointer;transition:all .2s;margin-bottom:12px;}
+    .add-btn:hover{border-color:var(--bacc);color:var(--og);}
+
+    .plan-btn{width:100%;padding:13px;background:var(--orange);color:#fff;border:none;border-radius:30px;font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;box-shadow:0 4px 18px rgba(240,125,42,0.3);}
+    .plan-btn:hover{background:#D46B18;transform:translateY(-1px);}
+
+    /* ROUTE RESULT */
+    #route-result{margin-top:14px;}
+    .r-header{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:10px;}
+    .r-header h3{font-family:var(--fd);font-size:13px;font-weight:700;margin-bottom:9px;}
+    .r-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+    .r-stat{background:rgba(240,125,42,0.08);border:1px solid var(--bacc);border-radius:8px;padding:7px 4px;text-align:center;}
+    .r-sv{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--orange);display:block;}
+    .r-sl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+
+    .s-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;}
+    .s-card:hover{border-color:var(--bacc);}
+    .s-top{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+    .s-num{width:22px;height:22px;background:var(--orange);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;}
+    .s-name{font-family:var(--fd);font-size:12.5px;font-weight:700;flex:1;}
+    .s-km{font-size:10px;color:var(--muted);}
+    .pills{display:flex;gap:5px;flex-wrap:wrap;}
+    .p{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;}
+    .pg{background:rgba(74,222,128,0.1);color:var(--green);border:1px solid rgba(74,222,128,0.2);}
+    .py{background:rgba(252,211,77,0.1);color:var(--yellow);border:1px solid rgba(252,211,77,0.2);}
+    .pr{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.2);}
+    .po{background:rgba(240,125,42,0.1);color:var(--og);border:1px solid var(--bacc);}
+    .pb{background:rgba(96,165,250,0.1);color:#60A5FA;border:1px solid rgba(96,165,250,0.2);}
+    .nearby{margin-top:7px;padding-top:7px;border-top:1px solid var(--border);font-size:11px;color:var(--soft);}
+    .nearby b{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:4px;}
+    .tip{margin-top:6px;font-size:11px;color:var(--muted);font-style:italic;line-height:1.5;}
+
+    /* MAP */
+    .map-wrap{height:320px;position:relative;border-top:1px solid var(--border);}
+    #map{width:100%;height:100%;}
+    .map-no{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:13px;gap:8px;}
+    .map-no .em{font-size:40px;}
+    .map-layers{position:absolute;top:10px;right:10px;z-index:10;display:flex;flex-direction:column;gap:6px;}
+    .ml-btn{background:rgba(9,12,26,0.9);backdrop-filter:blur(8px);border:1px solid var(--border);color:var(--soft);padding:7px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;}
+    .ml-btn:hover,.ml-btn.on{background:rgba(240,125,42,0.15);border-color:var(--orange);color:var(--orange);}
+    .map-leg{position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(9,12,26,0.88);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:8px 14px;display:flex;gap:12px;flex-wrap:wrap;}
+    .leg-i{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);}
+    .leg-d{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+    /* DEST TAB */
+    .d-search{margin-bottom:12px;}
+    .d-search input{padding-left:34px;}
+    .d-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+    .d-card:hover{border-color:var(--bacc);background:var(--card2);}
+    .d-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+    .d-name{font-family:var(--fd);font-size:13px;font-weight:700;}
+    .d-sub{font-size:11px;color:var(--muted);margin-bottom:8px;}
+    .d-rows{display:flex;flex-direction:column;gap:4px;}
+    .d-row{display:flex;gap:7px;font-size:11.5px;align-items:flex-start;}
+    .d-icon{font-size:12px;flex-shrink:0;}
+    .d-lbl{color:var(--muted);font-weight:600;min-width:52px;font-size:10.5px;flex-shrink:0;}
+    .d-val{color:var(--soft);line-height:1.4;}
+
+    /* SEASON TAB */
+    .m-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px;}
+    .m-btn{padding:9px 4px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:11.5px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s;}
+    .m-btn:hover{border-color:var(--bacc);color:var(--og);}
+    .m-btn.sel{background:rgba(240,125,42,0.12);border-color:var(--orange);color:var(--orange);}
+    .ss-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin:10px 0 6px;}
+    .sc{background:var(--card);border-radius:var(--r);padding:10px;margin-bottom:6px;border-left:3px solid transparent;cursor:pointer;}
+    .sc:hover{background:var(--card2);}
+    .sc.best{border-left-color:var(--green);}
+    .sc.okay{border-left-color:var(--yellow);}
+    .sc.bad{border-left-color:var(--red);}
+    .sc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+    .sc-name{font-family:var(--fd);font-size:12px;font-weight:700;}
+    .sbadge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;}
+    .sb-best{background:rgba(74,222,128,0.12);color:var(--green);}
+    .sb-okay{background:rgba(252,211,77,0.12);color:var(--yellow);}
+    .sb-bad{background:rgba(248,113,113,0.12);color:var(--red);}
+    .sc-sub{font-size:11px;color:var(--muted);}
+  </style>
+</head>
+<body>
+
+<div class="nav">
+  <a class="nav-logo" href="index.html">Trip<em>Dost</em> 🗺️</a>
+  <span class="nav-tag">BETA v0.1</span>
+  <a class="nav-back" href="index.html">← Home</a>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('route')">🗺️ Route Planner</div>
+  <div class="tab" onclick="switchTab('dest')">📍 Destinations</div>
+  <div class="tab" onclick="switchTab('season')">🗓️ Best Season</div>
+</div>
+
+<div class="panels">
+
+  <!-- ROUTE -->
+  <div class="panel active" id="panel-route">
+    <label class="fl">From</label>
+    <div class="fw"><span class="ic">🏠</span><select id="from-sel"><option value="">Select starting city...</option></select></div>
+
+    <label class="fl">Via (optional stops)</label>
+    <div class="stops-list" id="stops-list"></div>
+    <button class="add-btn" onclick="addStop()">+ Add a Stop</button>
+
+    <label class="fl">To (Destination)</label>
+    <div class="fw"><span class="ic">📍</span><select id="to-sel"><option value="">Select destination...</option></select></div>
+
+    <label class="fl">Travel Mode</label>
+    <div class="fw"><span class="ic">🏍️</span>
+      <select id="mode-sel">
+        <option value="bike">🏍️ Bike</option>
+        <option value="car">🚗 Car</option>
+        <option value="bus">🚌 Bus</option>
+      </select>
+    </div>
+
+    <button class="plan-btn" onclick="planRoute()">Plan My Trip 🚀</button>
+    <div id="route-result"></div>
+  </div>
+
+  <!-- DESTINATIONS -->
+  <div class="panel" id="panel-dest">
+    <div class="d-search fw"><span class="ic">🔍</span><input type="text" id="d-search" placeholder="Search destination..." oninput="filterDests()"/></div>
+    <div id="dest-grid"></div>
+  </div>
+
+  <!-- SEASON -->
+  <div class="panel" id="panel-season">
+    <label class="fl">Select Month to Visit</label>
+    <div class="m-grid" id="month-grid"></div>
+    <div id="season-res"></div>
+  </div>
+
+</div>
+
+<!-- MAP -->
+<div class="map-wrap">
+  <div id="map"></div>
+  <div class="map-layers">
+    <button class="ml-btn on" id="btn-d" onclick="toggleLayer('d')">📍 Destinations</button>
+    <button class="ml-btn" id="btn-f" onclick="toggleLayer('f')">⛽ Fuel</button>
+    <button class="ml-btn" id="btn-food" onclick="toggleLayer('food')">🍽️ Food</button>
+  </div>
+  <div class="map-leg">
+    <div class="leg-i"><div class="leg-d" style="background:#22c55e"></div>Open</div>
+    <div class="leg-i"><div class="leg-d" style="background:#f59e0b"></div>Seasonal</div>
+    <div class="leg-i"><div class="leg-d" style="background:#3B82F6"></div>Fuel</div>
+    <div class="leg-i"><div class="leg-d" style="background:#EC4899"></div>Food</div>
+    <div class="leg-i" id="route-leg" style="display:none"><div class="leg-d" style="background:#F07D2A;border-radius:1px;width:16px;height:3px"></div>Route</div>
+  </div>
+</div>
+
+<script>
+const DEST=[
+  {id:"araku",name:"Araku Valley",dist:"Visakhapatnam",type:"Hill Station",lat:18.3273,lng:82.8754,status:"open",parking:"Free (500m walk)",entry:"Free",timings:"All day",bestM:[10,11,12,1,2,3],avoidM:[6,7,8,9],modes:{bike:"Best — scenic ghat road",car:"Great",bus:"Train from Vizag"},petrol:"Araku town (3km)",network:"Patchy 2G–4G",food:"Dhabas & tribal stalls",tip:"Sunrise at Padmapuram stunning. Avoid monsoon — landslides."},
+  {id:"borra",name:"Borra Caves",dist:"Visakhapatnam",type:"Cave",lat:18.2833,lng:83.0167,status:"open",parking:"Free (300m)",entry:"₹65/₹30",timings:"9AM–5PM",bestM:[10,11,12,1,2],avoidM:[6,7,8],modes:{bike:"Good",car:"Better",bus:"Limited"},petrol:"Araku (12km)",network:"Poor inside",food:"Canteen at entrance",tip:"Weekdays less crowded. Light show extra cost."},
+  {id:"lambasingi",name:"Lambasingi",dist:"Visakhapatnam",type:"Hill Station",lat:17.9167,lng:82.3333,status:"seasonal",parking:"Limited",entry:"Free",timings:"All day",bestM:[11,12,1],avoidM:[3,4,5,6,7,8,9],modes:{bike:"Avoid — ghat",car:"Best",bus:"No direct"},petrol:"Chintapalle (15km)",network:"No signal",food:"Carry food",tip:"AP's Kashmir. Nov–Jan only. Download offline maps!"},
+  {id:"rushikonda",name:"Rushikonda Beach",dist:"Visakhapatnam",type:"Beach",lat:17.7770,lng:83.3800,status:"open",parking:"₹30 (50m)",entry:"Free",timings:"All day",bestM:[10,11,12,1,2,3],avoidM:[6,7,8],modes:{bike:"Great",car:"Good",bus:"City bus"},petrol:"Vizag city (8km)",network:"Excellent 4G",food:"Beach shacks",tip:"Check safety flags. Red flag = unsafe. Water sports Oct–Mar."},
+  {id:"charminar",name:"Charminar",dist:"Hyderabad",type:"Heritage",lat:17.3616,lng:78.4747,status:"open",parking:"Use Metro",entry:"₹25/₹300",timings:"9AM–5:30PM",bestM:[10,11,12,1,2,3],avoidM:[4,5,6],modes:{bike:"Difficult — traffic",car:"Avoid",bus:"Metro best"},petrol:"Many nearby",network:"Excellent 5G",food:"Biryani everywhere!",tip:"Early morning for photos. Evening very crowded."},
+  {id:"belum",name:"Belum Caves",dist:"Kurnool",type:"Cave",lat:15.0756,lng:78.2622,status:"open",parking:"Free campus",entry:"₹55/₹35",timings:"10AM–5PM",bestM:[10,11,12,1,2],avoidM:[4,5,6],modes:{bike:"Good",car:"Best",bus:"Limited"},petrol:"Tadipatri (30km)",network:"Moderate",food:"Canteen inside",tip:"2nd longest cave in India. Guided tour available."},
+  {id:"ethipothala",name:"Ethipothala Falls",dist:"Guntur",type:"Waterfall",lat:16.4333,lng:79.6333,status:"seasonal",parking:"Free",entry:"₹30",timings:"8AM–6PM",bestM:[8,9,10,11,12,1],avoidM:[3,4,5,6,7],modes:{bike:"Good",car:"Good",bus:"Limited"},petrol:"Macherla (10km)",network:"Moderate",food:"Small stalls",tip:"Best Aug–Oct post-monsoon. Crocodile sanctuary nearby."},
+  {id:"horsleyhills",name:"Horsley Hills",dist:"Anantapur",type:"Hill Station",lat:13.6575,lng:78.3958,status:"open",parking:"Free",entry:"₹20",timings:"All day",bestM:[10,11,12,1,2,3],avoidM:[5,6],modes:{bike:"Scenic",car:"Good",bus:"Limited"},petrol:"Madanapalle (15km)",network:"Moderate 4G",food:"AP Tourism canteen",tip:"Only hill station in Rayalaseema. Cool even in summer."},
+  {id:"nagarjunasagar",name:"Nagarjunasagar Dam",dist:"Nalgonda",type:"Dam/Historic",lat:16.5500,lng:79.3167,status:"open",parking:"Free",entry:"Free/₹10",timings:"6AM–6PM",bestM:[10,11,12,1,2,3],avoidM:[6,7,8],modes:{bike:"Good",car:"Best",bus:"From Hyderabad"},petrol:"Macherla (25km)",network:"Good 4G",food:"Restaurants nearby",tip:"Boat to Nagarjuna Konda island — Buddhist ruins."},
+  {id:"kailasagiri",name:"Kailasagiri",dist:"Visakhapatnam",type:"Viewpoint",lat:17.7376,lng:83.3714,status:"open",parking:"₹50",entry:"₹30",timings:"9AM–8PM",bestM:[10,11,12,1,2,3,4],avoidM:[6,7,8],modes:{bike:"Good",car:"Good",bus:"City bus"},petrol:"Vizag (5km)",network:"Excellent 4G",food:"Food court inside",tip:"Ropeway available. Sea view stunning at sunset."},
+];
+const CITIES=[
+  {id:"hyd",name:"Hyderabad",lat:17.3850,lng:78.4867},
+  {id:"vizag",name:"Visakhapatnam",lat:17.6868,lng:83.2185},
+  {id:"vijayawada",name:"Vijayawada",lat:16.5062,lng:80.6480},
+  {id:"tirupati",name:"Tirupati",lat:13.6288,lng:79.4192},
+  {id:"guntur",name:"Guntur",lat:16.3008,lng:80.4428},
+  {id:"kurnool",name:"Kurnool",lat:15.8281,lng:78.0373},
+  {id:"warangal",name:"Warangal",lat:18.0000,lng:79.5833},
+];
+const FUEL=[
+  {name:"HP Bunk",lat:18.3100,lng:82.8600,town:"Araku"},
+  {name:"Indian Oil",lat:17.6900,lng:83.2100,town:"Vizag"},
+  {name:"BPCL",lat:17.3650,lng:78.4700,town:"Hyderabad"},
+  {name:"HP Fuel",lat:17.9100,lng:82.3200,town:"Chintapalle"},
+  {name:"Indian Oil",lat:16.4300,lng:79.6200,town:"Macherla"},
+  {name:"BPCL",lat:15.0700,lng:78.2500,town:"Tadipatri"},
+  {name:"Indian Oil",lat:13.6400,lng:78.3800,town:"Madanapalle"},
+];
+const FOODSTOPS=[
+  {name:"Araku Coffee Stall",lat:18.3250,lng:82.8750,type:"Cafe"},
+  {name:"Highway Dhaba",lat:17.8500,lng:82.9000,type:"Dhaba"},
+  {name:"Vizag Sea View",lat:17.7100,lng:83.3500,type:"Restaurant"},
+  {name:"Shah Ghouse Biryani",lat:17.3600,lng:78.4750,type:"Biryani"},
+  {name:"Nagarjunasagar Dhaba",lat:16.5400,lng:79.3100,type:"Dhaba"},
+];
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+let map=null,leafletOK=false;
+let dLayers=[],fLayers=[],foodLayers=[],routeLayer=null;
+let showD=true,showF=false,showFood=false;
+
+window.addEventListener('DOMContentLoaded',function(){
+  populateSelects();
+  renderDestGrid();
+  renderMonthGrid();
+  loadLeaflet();
+});
+
+function loadLeaflet(){
+  var l=document.createElement('link');l.rel='stylesheet';l.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(l);
+  var s=document.createElement('script');s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  s.onload=function(){leafletOK=true;initMap();};
+  s.onerror=function(){document.getElementById('map').innerHTML='<div class="map-no"><div class="em">🗺️</div><div>Map loads on GitHub Pages</div></div>';};
+  document.head.appendChild(s);
+}
+
+function initMap(){
+  try{
+    map=L.map('map',{zoomControl:true}).setView([16.5,80.5],6);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© CARTO',maxZoom:19}).addTo(map);
+    renderDMarkers();
+  }catch(e){console.error(e);}
+}
+
+function mkIcon(color,emoji,size){
+  size=size||30;
+  return L.divIcon({html:`<div style="width:${size}px;height:${size}px;background:${color};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*.42)}px;border:2px solid rgba(255,255,255,0.2);box-shadow:0 2px 8px rgba(0,0,0,.5);">${emoji}</div>`,iconSize:[size,size],iconAnchor:[size/2,size/2],className:''});
+}
+
+function renderDMarkers(){
+  if(!map||!leafletOK)return;
+  dLayers.forEach(m=>map.removeLayer(m));dLayers=[];
+  if(!showD)return;
+  DEST.forEach(d=>{
+    var c=d.status==='open'?'#22c55e':d.status==='seasonal'?'#f59e0b':'#ef4444';
+    var m=L.marker([d.lat,d.lng],{icon:mkIcon(c,'📍',32)}).bindPopup(`<b>${d.name}</b><br><small>${d.dist}</small><br><br><b style="color:${c}">${d.status==='open'?'✅ Open':d.status==='seasonal'?'🕐 Seasonal':'❌ Closed'}</b><br>🅿️ ${d.parking}<br>⏰ ${d.timings}<br>🎫 ${d.entry}`).addTo(map);
+    dLayers.push(m);
+  });
+}
+function renderFMarkers(){
+  if(!map||!leafletOK)return;
+  fLayers.forEach(m=>map.removeLayer(m));fLayers=[];
+  if(!showF)return;
+  FUEL.forEach(f=>{var m=L.marker([f.lat,f.lng],{icon:mkIcon('#3B82F6','⛽',26)}).bindPopup(`<b>${f.name}</b><br><small>${f.town}</small>`).addTo(map);fLayers.push(m);});
+}
+function renderFoodMarkers(){
+  if(!map||!leafletOK)return;
+  foodLayers.forEach(m=>map.removeLayer(m));foodLayers=[];
+  if(!showFood)return;
+  FOODSTOPS.forEach(f=>{var m=L.marker([f.lat,f.lng],{icon:mkIcon('#EC4899','🍽️',26)}).bindPopup(`<b>${f.name}</b><br><small>${f.type}</small>`).addTo(map);foodLayers.push(m);});
+}
+function toggleLayer(l){
+  if(l==='d'){showD=!showD;document.getElementById('btn-d').classList.toggle('on',showD);renderDMarkers();}
+  if(l==='f'){showF=!showF;document.getElementById('btn-f').classList.toggle('on',showF);renderFMarkers();}
+  if(l==='food'){showFood=!showFood;document.getElementById('btn-food').classList.toggle('on',showFood);renderFoodMarkers();}
+}
+
+function getPoint(id){return CITIES.find(c=>c.id===id)||DEST.find(d=>d.id===id);}
+
+function populateSelects(){
+  ['from-sel','to-sel'].forEach(function(sid){
+    var sel=document.getElementById(sid);
+    var g1=document.createElement('optgroup');g1.label='🏙️ Cities';
+    CITIES.forEach(function(c){var o=document.createElement('option');o.value=c.id;o.textContent=c.name;g1.appendChild(o);});
+    var g2=document.createElement('optgroup');g2.label='📍 Destinations';
+    DEST.forEach(function(d){var o=document.createElement('option');o.value=d.id;o.textContent=d.name;g2.appendChild(o);});
+    sel.appendChild(g1);sel.appendChild(g2);
+  });
+}
+
+function makeStopSel(){
+  var sel=document.createElement('select');
+  sel.innerHTML='<option value="">Select stop...</option>';
+  var g1=document.createElement('optgroup');g1.label='🏙️ Cities';
+  CITIES.forEach(function(c){var o=document.createElement('option');o.value=c.id;o.textContent=c.name;g1.appendChild(o);});
+  var g2=document.createElement('optgroup');g2.label='📍 Destinations';
+  DEST.forEach(function(d){var o=document.createElement('option');o.value=d.id;o.textContent=d.name;g2.appendChild(o);});
+  sel.appendChild(g1);sel.appendChild(g2);
+  return sel;
+}
+
+function addStop(){
+  var list=document.getElementById('stops-list');
+  var div=document.createElement('div');div.className='stop-item';
+  var sel=makeStopSel();
+  var btn=document.createElement('button');btn.className='rm-btn';btn.textContent='×';btn.onclick=function(){div.remove();};
+  div.appendChild(sel);div.appendChild(btn);list.appendChild(div);
+}
+
+function km(a,b){return Math.round(Math.sqrt(Math.pow((a.lat-b.lat)*111,2)+Math.pow((a.lng-b.lng)*89,2)));}
+
+function planRoute(){
+  var fromId=document.getElementById('from-sel').value;
+  var toId=document.getElementById('to-sel').value;
+  var mode=document.getElementById('mode-sel').value;
+  if(!fromId){alert('Please select a starting point!');return;}
+  if(!toId){alert('Please select a destination!');return;}
+  var fromP=getPoint(fromId),toP=getPoint(toId);
+  var stopIds=Array.from(document.querySelectorAll('#stops-list select')).map(function(s){return s.value;}).filter(function(v){return v;});
+  var stopPts=stopIds.map(getPoint).filter(Boolean);
+  var allPts=[fromP].concat(stopPts).concat([toP]);
+  var totalKm=0;
+  for(var i=0;i<allPts.length-1;i++)totalKm+=km(allPts[i],allPts[i+1]);
+  var spd={bike:45,car:58,bus:35}[mode];
+  var hrs=totalKm/spd;
+  var hrsStr=hrs<1?Math.round(hrs*60)+'min':Math.floor(hrs)+'h '+(Math.round((hrs%1)*60)||0)+'min';
+  var fuel=mode==='bus'?'~₹'+(totalKm*.6).toFixed(0):mode==='bike'?'~₹'+(totalKm/40*105).toFixed(0):'~₹'+(totalKm/15*105).toFixed(0);
+
+  if(map&&leafletOK){
+    if(routeLayer){map.removeLayer(routeLayer);routeLayer=null;}
+    var coords=allPts.map(function(p){return[p.lat,p.lng];});
+    routeLayer=L.polyline(coords,{color:'#F07D2A',weight:4,dashArray:'8,5',opacity:.9}).addTo(map);
+    map.fitBounds(routeLayer.getBounds().pad(.15));
+    document.getElementById('route-leg').style.display='flex';
+    document.querySelector('.map-wrap').scrollIntoView({behavior:'smooth'});
+  }
+
+  var allDestStops=stopPts.concat([toP]).map(function(p){return DEST.find(function(d){return d.id===p.id;});}).filter(Boolean);
+
+  function spill(s){if(s==='open')return '<span class="p pg">✅ Open</span>';if(s==='seasonal')return '<span class="p py">🕐 Seasonal</span>';return '<span class="p pr">❌ Closed</span>';}
+  function mpill(d){var t=d.modes[mode];return t?'<span class="p po">'+t+'</span>':'';}
+  function nf(d){return FUEL.find(function(f){return Math.sqrt(Math.pow((f.lat-d.lat)*111,2)+Math.pow((f.lng-d.lng)*89,2))<40;});}
+  function nfd(d){return FOODSTOPS.find(function(f){return Math.sqrt(Math.pow((f.lat-d.lat)*111,2)+Math.pow((f.lng-d.lng)*89,2))<30;});}
+
+  var html='<div class="r-header"><h3>📍 '+fromP.name+' → '+toP.name+'</h3><div class="r-stats"><div class="r-stat"><span class="r-sv">~'+totalKm+'km</span><span class="r-sl">Distance</span></div><div class="r-stat"><span class="r-sv">'+hrsStr+'</span><span class="r-sl">Duration</span></div><div class="r-stat"><span class="r-sv">'+fuel+'</span><span class="r-sl">Fuel Est.</span></div><div class="r-stat"><span class="r-sv">'+allDestStops.length+'</span><span class="r-sl">Stops</span></div></div></div>';
+  html+='<div class="s-card"><div class="s-top"><span class="s-num">S</span><span class="s-name">'+fromP.name+'</span><span class="s-km">Start</span></div><div class="pills"><span class="p pb">🚀 Departure</span></div></div>';
+
+  allDestStops.forEach(function(d,i){
+    var prevP=i===0?fromP:allDestStops[i-1]||fromP;
+    var k=km(prevP,d);
+    var f=nf(d),fd=nfd(d);
+    html+='<div class="s-card"><div class="s-top"><span class="s-num">'+(i+1)+'</span><span class="s-name">'+d.name+'</span><span class="s-km">~'+k+'km</span></div>';
+    html+='<div class="pills">'+spill(d.status)+mpill(d)+'<span class="p po">⏰ '+d.timings+'</span><span class="p po">🎫 '+d.entry+'</span></div>';
+    if(f||fd){html+='<div class="nearby"><b>Nearby</b>'+(f?'<div>⛽ '+f.name+' — '+f.town+'</div>':'')+(fd?'<div>🍽️ '+fd.name+' — '+fd.type+'</div>':'')+'</div>';}
+    if(d.tip){html+='<div class="tip">💡 '+d.tip+'</div>';}
+    html+='</div>';
+  });
+
+  var res=document.getElementById('route-result');
+  res.innerHTML=html;
+  res.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderDestGrid(filter){
+  var grid=document.getElementById('dest-grid');
+  grid.innerHTML='';
+  var list=filter?DEST.filter(function(d){return d.name.toLowerCase().includes(filter.toLowerCase())||d.dist.toLowerCase().includes(filter.toLowerCase());}):DEST;
+  list.forEach(function(d){
+    var c=d.status==='open'?'var(--green)':d.status==='seasonal'?'var(--yellow)':'var(--red)';
+    var st=d.status==='open'?'✅ Open':d.status==='seasonal'?'🕐 Seasonal':'❌ Closed';
+    var div=document.createElement('div');div.className='d-card';
+    div.innerHTML='<div class="d-top"><span class="d-name">'+d.name+'</span><span style="font-size:10.5px;font-weight:700;color:'+c+'">'+st+'</span></div><div class="d-sub">'+d.dist+' · '+d.type+'</div><div class="d-rows"><div class="d-row"><span class="d-icon">🅿️</span><span class="d-lbl">Parking</span><span class="d-val">'+d.parking+'</span></div><div class="d-row"><span class="d-icon">🎫</span><span class="d-lbl">Entry</span><span class="d-val">'+d.entry+'</span></div><div class="d-row"><span class="d-icon">⏰</span><span class="d-lbl">Timings</span><span class="d-val">'+d.timings+'</span></div><div class="d-row"><span class="d-icon">📶</span><span class="d-lbl">Network</span><span class="d-val">'+d.network+'</span></div><div class="d-row"><span class="d-icon">⛽</span><span class="d-lbl">Petrol</span><span class="d-val">'+d.petrol+'</span></div><div class="d-row"><span class="d-icon">💡</span><span class="d-lbl">Tip</span><span class="d-val">'+d.tip+'</span></div></div>';
+    div.onclick=function(){if(map&&leafletOK)map.setView([d.lat,d.lng],12);};
+    grid.appendChild(div);
+  });
+}
+function filterDests(){renderDestGrid(document.getElementById('d-search').value);}
+
+function renderMonthGrid(){
+  var grid=document.getElementById('month-grid');
+  grid.innerHTML='';
+  MONTHS.forEach(function(m,i){
+    var btn=document.createElement('div');btn.className='m-btn';btn.textContent=m;
+    btn.onclick=function(){
+      document.querySelectorAll('.m-btn').forEach(function(b){b.classList.remove('sel');});
+      btn.classList.add('sel');
+      showSeason(i+1);
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function showSeason(month){
+  var best=[],okay=[],avoid=[];
+  DEST.forEach(function(d){
+    if(d.bestM.includes(month))best.push(d);
+    else if(d.avoidM.includes(month))avoid.push(d);
+    else okay.push(d);
+  });
+  function cards(arr,cls,badge,bc,sub){
+    return arr.map(function(d){return '<div class="sc '+cls+'" onclick="'+(map&&leafletOK?'map.setView(['+d.lat+','+d.lng+'],11)':'')+'"><div class="sc-top"><span class="sc-name">'+d.name+'</span><span class="sbadge '+bc+'">'+badge+'</span></div><div class="sc-sub">'+d.dist+' · '+sub+'</div></div>';}).join('');
+  }
+  var html='';
+  if(best.length)html+='<div class="ss-title" style="color:var(--green)">✅ Best to Visit ('+best.length+')</div>'+cards(best,'best','Best Season','sb-best','Perfect!');
+  if(okay.length)html+='<div class="ss-title" style="color:var(--yellow)">⚡ Okay to Visit ('+okay.length+')</div>'+cards(okay,'okay','Okay','sb-okay','Manageable');
+  if(avoid.length)html+='<div class="ss-title" style="color:var(--red)">⚠️ Better Avoid ('+avoid.length+')</div>'+cards(avoid,'bad','Avoid','sb-bad','Not ideal');
+  document.getElementById('season-res').innerHTML=html;
+}
+
+function switchTab(tab){
+  var tabs=['route','dest','season'];
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===tab);});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+</script>
+</body>
+</html>
